@@ -9,14 +9,15 @@ on:
 env:
   PACKAGE_PROJECT: "./Autofac.Extensions.DependencyInjection.AzureFunctions/Autofac.Extensions.DependencyInjection.AzureFunctions.csproj"
   BUILD_PLATFORM: "Any CPU"
-  BUILD_CONFIGURATION: "Release"
-  PUBLISH_DIR: ${{ runner.temp + "/publish" }}
+  BUILD_CONFIGURATION: "Release" 
   SHOULD_PUBLISH: ${{ github.ref == "refs/heads/master" }}
   
 jobs:
   build:
     runs-on: "ubuntu-latest"
-     
+    env:
+      PUBLISH_DIR: "${{ runner.temp }}/publish"
+      
     steps:
       - name: Checkout
         uses: actions/checkout@v2
