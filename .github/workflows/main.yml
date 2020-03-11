@@ -1,4 +1,4 @@
-name: $(Date:yyyy.MM.dd)$(Rev:.r)
+name: "NuGet"
 
 on:
   push:
@@ -10,7 +10,7 @@ env:
   solution: 'autofac-azurefunctions.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
-  shoudlPublish: $[ eq(variables['Build.SourceBranch'], 'refs/heads/master') ]
+  shouldPublish: ${{ github.ref == 'refs/heads/master' }}
 
 jobs:
   build:
@@ -35,5 +35,5 @@ jobs:
       run: msbuild -p:Configuration="$(buildConfiguration)" -p:Platform="$(buildPlatform)" -m -p:GeneratePackageOnBuild=true -p:OutDir=$(Build.ArtifactStagingDirectory)/publish -p:Version=$(Build.BuildNumber) -p:AssemblyVersion=$(Build.BuildNumber) -p:AssemblyInformationalVersion=$(Build.BuildNumber)
 
     - name: Publish Package
-      if: eq(variables.shoudlPublish, true)
+      if: env.shouldPublish == true
       run: echo "test"; ls;
