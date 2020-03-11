@@ -12,7 +12,6 @@ env:
   BUILD_CONFIGURATION: "Release" 
   SHOULD_PUBLISH: ${{ github.ref == 'refs/heads/master' }}
   PUBLISH_DIR: "${{ github.workspace }}/_publish"
-  NUGET_SOURCE: "https://api.nuget.org/v3/index.json"
   
 jobs:
   build:
@@ -42,7 +41,6 @@ jobs:
         with:
           nuget-version: "latest"
           nuget-api-key: ${{ secrets.NUGET_KEY }}
-          nuget-api-key-source: ${{ env.NUGET_SOURCE }}
 
       - name: NuGet Restore
         run: nuget restore
