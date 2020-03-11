@@ -33,7 +33,7 @@ jobs:
       - name: "Set Version Number"
         run: |
           echo "::set-env name=VERSION_NUMBER::$(date -d ${{ steps.author-date.outputs.result }} +%Y.%m.%d.%H%M)";
-          PACKAGE_VERSION=$(cat $PACKAGE_PROJECT | grep -oPm1 (?<=<PackageVersionPrefix>)[^<]+);
+          PACKAGE_VERSION=$(cat "$PACKAGE_PROJECT" | grep -oPm1 "(?<=<PackageVersion>)[^<]+")
           echo "::set-env name=PACKAGE_VERSION::$PACKAGE_VERSION.${{ github.run_number }}";
 
       - name: Setup NuGet
