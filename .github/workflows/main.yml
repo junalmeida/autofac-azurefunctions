@@ -30,7 +30,7 @@ jobs:
             return commit_details.data.author.date
             
       - name: "Set Version Number"
-        run: echo Version number: $VERSION_NUMBER
+        run: echo Version number $VERSION_NUMBER
         env:
           VERSION_NUMBER: ${{ steps.author-date.outputs.result }}
 
