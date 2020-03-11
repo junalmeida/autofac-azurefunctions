@@ -45,5 +45,5 @@ jobs:
         run: msbuild -p:Configuration="$BUILD_CONFIGURATION" -p:Platform="$BUILD_PLATFORM" -m -p:GeneratePackageOnBuild=true -p:OutDir=$PUBLISH_DIR -p:Version=$VERSION_NUMBER -p:AssemblyVersion=$VERSION_NUMBER -p:AssemblyInformationalVersion=$VERSION_NUMBER -p:GenerateProjectSpecificOutputFolder=true
         
       - name: Publish Package
-        if: env.SHOULD_PUBLISH == true
+        if: env.should_publish == true
         run: echo "Publish Test"; ls $PUBLISH_DIR;
