@@ -40,7 +40,7 @@ jobs:
         uses: NuGet/setup-nuget@v1.0.2
         with:
           nuget-version: "latest"
-          nuget-api-key: ""
+          nuget-api-key: ${{ secrets.NUGET_KEY }}
 
       - name: NuGet Restore
         run: nuget restore
@@ -51,7 +51,10 @@ jobs:
       - name: Publish Package
         id: "publish"
         if: env.SHOULD_PUBLISH == 'true' && success()
-        run: echo "Publish Test $PACKAGE_VERSION"; ls $PUBLISH_DIR;
+        run: |
+          for f in $(find $PUBLISH_DIR -name '*.nupkg'); do 
+            nuget push $f;
+          done;
         
       - name: Create Release
         id: create_release
