@@ -54,7 +54,7 @@ jobs:
         if: env.SHOULD_PUBLISH == 'true' && success()
         run: |
           for f in $(find $PUBLISH_DIR -name '*.nupkg'); do 
-            nuget push $f -s $NUGET_SOURCE;
+            nuget push $f -Source $NUGET_SOURCE;
           done;
         
       - name: Create Release
