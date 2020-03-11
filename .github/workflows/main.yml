@@ -54,7 +54,7 @@ jobs:
         run: |
           for f in $(find $PUBLISH_DIR -name '*.nupkg'); do 
             echo "Pushing $f...";
-            nuget push "$f" -Source $NUGET_SOURCE -NonInteractive;
+            nuget push "$f" -NonInteractive;
           done;
         
       - name: Create Release
