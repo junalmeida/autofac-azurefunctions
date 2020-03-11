@@ -30,9 +30,7 @@ jobs:
             return commit_details.data.author.date
             
       - name: "Set Version Number"
-        run: echo Version number $VERSION_NUMBER
-        env:
-          VERSION_NUMBER: ${{ steps.author-date.outputs.result }}
+        run: echo "::set-env name=VERSION_NUMBER::$(date -d ${{ steps.author-date.outputs.result }} +%Y.%m.%d.%H%M)"
 
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1.0.2
@@ -44,8 +42,8 @@ jobs:
         run: nuget restore
 
       - name: Build
-        run: msbuild -p:Configuration="$BUILD_CONFIGURATION" -p:Platform="$BUILD_PLATFORM" -m -p:GeneratePackageOnBuild=true -p:OutDir=$PUBLISH_DIR -p:Version=$VERSION_NUMBER -p:AssemblyVersion=$VERSION_NUMBER -p:AssemblyInformationalVersion=$VERSION_NUMBER
-
+        run: msbuild -p:Configuration="$BUILD_CONFIGURATION" -p:Platform="$BUILD_PLATFORM" -m -p:GeneratePackageOnBuild=true -p:OutDir=$PUBLISH_DIR -p:Version=$VERSION_NUMBER -p:AssemblyVersion=$VERSION_NUMBER -p:AssemblyInformationalVersion=$VERSION_NUMBER -p:GenerateProjectSpecificOutputFolder=true
+        
       - name: Publish Package
         if: env.SHOULD_PUBLISH == true
         run: echo "Publish Test"; ls $PUBLISH_DIR;
