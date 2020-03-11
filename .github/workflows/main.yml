@@ -1,0 +1,39 @@
+name: $(Date:yyyy.MM.dd)$(Rev:.r)
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  solution: 'autofac-azurefunctions.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  shoudlPublish: $[ eq(variables['Build.SourceBranch'], 'refs/heads/master') ]
+
+jobs:
+  build:
+    runs-on: "ubuntu-latest"
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.0.0
+
+    - name: Setup NuGet
+      uses: NuGet/setup-nuget@v1.0.2
+      with:
+        nuget-version: "latest"
+        nuget-api-key: ""
+
+    - name: Nuget Restore
+      run: nuget restore
+
+    - name: Build
+      run: msbuild -p:Configuration="$(buildConfiguration)" -p:Platform="$(buildPlatform)" -m -p:GeneratePackageOnBuild=true -p:OutDir=$(Build.ArtifactStagingDirectory)/publish -p:Version=$(Build.BuildNumber) -p:AssemblyVersion=$(Build.BuildNumber) -p:AssemblyInformationalVersion=$(Build.BuildNumber)
+
+    - name: Publish Package
+      if: eq(variables.shoudlPublish, true)
+      run: echo "test"; ls;
