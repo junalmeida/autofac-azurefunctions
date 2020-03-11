@@ -13,7 +13,7 @@
     <PackageId>Autofac.Extensions.DependencyInjection.AzureFunctions</PackageId>
     <PackageTags>autofac;di;ioc;dependencyinjection;azure;azurefunctions;webjobs</PackageTags>
     <PackageReleaseNotes>Release notes are at https://github.com/junalmeida/autofac-azurefunctions/releases</PackageReleaseNotes>
-    <PackageIconUrl>https://cloud.githubusercontent.com/assets/1156571/13684110/16b8f152-e6bf-11e5-84ae-22c66c6d351a.png</PackageIconUrl>
+    <PackageIcon>icon.png</PackageIcon>
     <PackageProjectUrl>https://github.com/junalmeida/autofac-azurefunctions</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>
@@ -24,13 +24,18 @@
     <Authors>Marcos Almeida Jr</Authors>
     <Company></Company>
     <Product>Autofac</Product>
-
+    <IsPackable>true</IsPackable>
+    <PackageOutputPath>$(OutDir)/$(AssemblyName)</PackageOutputPath>
     <PackageVersion>6.0.0</PackageVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" />
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="icon.png" Pack="true" PackagePath="" />
   </ItemGroup>
 
 </Project>
