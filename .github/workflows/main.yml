@@ -7,10 +7,10 @@ on:
     branches: [ master ]
 
 env:
-  solution: 'autofac-azurefunctions.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
-  shouldPublish: ${{ github.ref == 'refs/heads/master' }}
+  BUILD_PLATFORM: 'Any CPU'
+  BUILD_CONFIGURATION: 'Release'
+  SHOULD_PUBLISH: ${{ github.ref == 'refs/heads/master' }}
+  PUBLISH_DIR: "../publish"
 
 jobs:
   build:
@@ -19,6 +19,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+        
+      - name: "Get Commit Date"
+        uses: actions/github-script@0.3.0
+        id: author-date
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |             
+            const commit_details = await github.git.getCommit({owner: context.repo.owner, repo: context.repo.repo, commit_sha: context.sha});
+            return commit_details.data.author.date
+            
+      - name: "Set Version Number"
+        run: echo Version number $VERSION_NUMBER
+        env:
+          VERSION_NUMBER: ${{ steps.author-date.outputs.result }}
 
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1.0.2
@@ -30,8 +44,8 @@ jobs:
         run: nuget restore
 
       - name: Build
-        run: msbuild -p:Configuration="$(buildConfiguration)" -p:Platform="$(buildPlatform)" -m -p:GeneratePackageOnBuild=true -p:OutDir=$(Build.ArtifactStagingDirectory)/publish -p:Version=$(Build.BuildNumber) -p:AssemblyVersion=$(Build.BuildNumber) -p:AssemblyInformationalVersion=$(Build.BuildNumber)
+        run: msbuild -p:Configuration="$BUILD_CONFIGURATION" -p:Platform="$BUILD_PLATFORM" -m -p:GeneratePackageOnBuild=true -p:OutDir=$PUBLISH_DIR -p:Version=$VERSION_NUMBER -p:AssemblyVersion=$VERSION_NUMBER -p:AssemblyInformationalVersion=$VERSION_NUMBER
 
       - name: Publish Package
-        if: env.shouldPublish == true
-        run: echo "test"; ls;
+        if: env.SHOULD_PUBLISH == true
+        run: echo "Publish Test"; ls $PUBLISH_DIR;
