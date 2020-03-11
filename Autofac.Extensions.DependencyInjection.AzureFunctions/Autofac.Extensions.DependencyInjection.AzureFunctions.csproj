@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <VersionPrefix>6.0.0</VersionPrefix>
+    <Description>Autofac implementation of the dependency injection factory for Azure Functions.</Description>
+    <Copyright>Copyright © 2020 Marcos Almeida Jr</Copyright>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NeutralResourcesLanguage>en-US</NeutralResourcesLanguage>
+    <NeutralLanguage>en-US</NeutralLanguage>
+
+    <PackageId>Autofac.Extensions.DependencyInjection.AzureFunctions</PackageId>
+    <PackageTags>autofac;di;ioc;dependencyinjection;azure;azurefunctions;webjobs</PackageTags>
+    <PackageReleaseNotes>Release notes are at https://github.com/junalmeida/autofac-azurefunctions/releases</PackageReleaseNotes>
+    <PackageIconUrl>https://cloud.githubusercontent.com/assets/1156571/13684110/16b8f152-e6bf-11e5-84ae-22c66c6d351a.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/junalmeida/autofac-azurefunctions</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/junalmeida/autofac-azurefunctions</RepositoryUrl>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedAllSources>true</EmbedAllSources>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+    <Authors>Marcos Almeida Jr</Authors>
+    <Company></Company>
+    <Product>Autofac</Product>
+
+    <PackageVersion>6.0.0</PackageVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />
+  </ItemGroup>
+
+</Project>
