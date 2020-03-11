@@ -15,9 +15,7 @@ env:
 jobs:
   build:
     runs-on: "ubuntu-latest"
-    env:
-      PUBLISH_DIR: "${{ runner.temp }}/publish"
-      
+     
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -47,7 +45,10 @@ jobs:
         run: nuget restore
 
       - name: Build
-        run: msbuild -p:Configuration="$BUILD_CONFIGURATION" -p:Platform="$BUILD_PLATFORM" -m -p:GeneratePackageOnBuild=true -p:OutDir=$PUBLISH_DIR -p:Version=$VERSION_NUMBER -p:AssemblyVersion=$VERSION_NUMBER -p:AssemblyInformationalVersion=$VERSION_NUMBER -p:GenerateProjectSpecificOutputFolder=true
+        run: |
+          PUBLISH_DIR: "${{ runner.temp }}/publish";
+          echo "::set-env name=PUBLISH_DIR::$PUBLISH_DIR";
+          msbuild -p:Configuration="$BUILD_CONFIGURATION" -p:Platform="$BUILD_PLATFORM" -m -p:GeneratePackageOnBuild=true -p:OutDir=$PUBLISH_DIR -p:Version=$VERSION_NUMBER -p:AssemblyVersion=$VERSION_NUMBER -p:AssemblyInformationalVersion=$VERSION_NUMBER -p:GenerateProjectSpecificOutputFolder=true
         
       - name: Publish Package
         id: "publish"
