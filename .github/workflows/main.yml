@@ -11,6 +11,7 @@ env:
   BUILD_PLATFORM: "Any CPU"
   BUILD_CONFIGURATION: "Release" 
   SHOULD_PUBLISH: ${{ github.ref == 'refs/heads/master' }}
+  PUBLISH_DIR: "${{ github.workspace }}/_publish"
   
 jobs:
   build:
@@ -45,10 +46,7 @@ jobs:
         run: nuget restore
 
       - name: Build
-        run: |
-          PUBLISH_DIR: "${{ runner.temp }}/publish";
-          echo "::set-env name=PUBLISH_DIR::$PUBLISH_DIR";
-          msbuild -p:Configuration="$BUILD_CONFIGURATION" -p:Platform="$BUILD_PLATFORM" -m -p:GeneratePackageOnBuild=true -p:OutDir=$PUBLISH_DIR -p:Version=$VERSION_NUMBER -p:AssemblyVersion=$VERSION_NUMBER -p:AssemblyInformationalVersion=$VERSION_NUMBER -p:GenerateProjectSpecificOutputFolder=true
+        run: msbuild -p:Configuration="$BUILD_CONFIGURATION" -p:Platform="$BUILD_PLATFORM" -m -p:GeneratePackageOnBuild=true -p:OutDir=$PUBLISH_DIR -p:Version=$VERSION_NUMBER -p:AssemblyVersion=$VERSION_NUMBER -p:AssemblyInformationalVersion=$VERSION_NUMBER -p:GenerateProjectSpecificOutputFolder=true
         
       - name: Publish Package
         id: "publish"
