@@ -10,13 +10,11 @@ env:
   PACKAGE_PROJECT: "./Autofac.Extensions.DependencyInjection.AzureFunctions/Autofac.Extensions.DependencyInjection.AzureFunctions.csproj"
   BUILD_PLATFORM: 'Any CPU'
   BUILD_CONFIGURATION: 'Release'
-  SHOULD_PUBLISH: ${{ github.ref == 'refs/heads/master' }}
   PUBLISH_DIR: "../publish"
 
 jobs:
   build:
     runs-on: "ubuntu-latest"
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -47,11 +45,16 @@ jobs:
 
       - name: Build
         run: msbuild -p:Configuration="$BUILD_CONFIGURATION" -p:Platform="$BUILD_PLATFORM" -m -p:GeneratePackageOnBuild=true -p:OutDir=$PUBLISH_DIR -p:Version=$VERSION_NUMBER -p:AssemblyVersion=$VERSION_NUMBER -p:AssemblyInformationalVersion=$VERSION_NUMBER -p:GenerateProjectSpecificOutputFolder=true
-
+        
+      - name: Publish Package
+        id: "publish"
+        if: github.ref == 'refs/heads/master'
+        run: echo "Publish Test ${{ env.PACKAGE_VERSION }}"; ls $PUBLISH_DIR;
+        
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
-        if: env.should_publish == 'true'
+        if: steps.publish.status == success()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
@@ -59,10 +62,8 @@ jobs:
           release_name: Release ${{ env.PACKAGE_VERSION }}
           body: |
             Changes in this Release
-            - This is the first release version. Next releases might have this description set automatically.
+            ${{ github.event.head_commit.message }}
           draft: false
           prerelease: false
           
-      - name: Publish Package
-        if: env.should_publish == 'true'
-        run: echo "Publish Test ${{ env.PACKAGE_VERSION }}"; ls $PUBLISH_DIR;
+
