@@ -15,6 +15,9 @@ env:
 jobs:
   build:
     runs-on: "ubuntu-latest"
+    env:
+      SHOULD_PUBLISH: ${{ github.ref == 'refs/heads/master' }}
+      
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -48,13 +51,13 @@ jobs:
         
       - name: Publish Package
         id: "publish"
-        if: github.ref == 'refs/heads/master'
-        run: echo "Publish Test ${{ env.PACKAGE_VERSION }}"; ls $PUBLISH_DIR;
+        if: job.env.SHOULD_PUBLISH == true
+        run: echo "Publish Test $PACKAGE_VERSION"; ls $PUBLISH_DIR;
         
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
-        if: steps.publish.status == success()
+        if: job.env.SHOULD_PUBLISH == true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
