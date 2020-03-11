@@ -10,7 +10,7 @@ env:
   PACKAGE_PROJECT: "./Autofac.Extensions.DependencyInjection.AzureFunctions/Autofac.Extensions.DependencyInjection.AzureFunctions.csproj"
   BUILD_PLATFORM: 'Any CPU'
   BUILD_CONFIGURATION: 'Release'
-  PUBLISH_DIR: "../publish"
+  PUBLISH_DIR: "${{runner.temp}}/publish"
   SHOULD_PUBLISH: ${{ github.ref == 'refs/heads/master' }}
   
 jobs:
