@@ -42,6 +42,7 @@ jobs:
         with:
           nuget-version: "latest"
           nuget-api-key: ${{ secrets.NUGET_KEY }}
+          nuget-api-key-source: ${{ env.NUGET_SOURCE }}
 
       - name: NuGet Restore
         run: nuget restore
@@ -54,7 +55,8 @@ jobs:
         if: env.SHOULD_PUBLISH == 'true' && success()
         run: |
           for f in $(find $PUBLISH_DIR -name '*.nupkg'); do 
-            nuget push $f -ApiKey $NUGET_KEY -Source $NUGET_SOURCE;
+            echo "Pushing $f...";
+            nuget push "$f" -Source $NUGET_SOURCE -NonInteractive;
           done;
         
       - name: Create Release
