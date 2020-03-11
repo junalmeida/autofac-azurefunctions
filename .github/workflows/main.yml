@@ -10,7 +10,7 @@ env:
   PACKAGE_PROJECT: "./Autofac.Extensions.DependencyInjection.AzureFunctions/Autofac.Extensions.DependencyInjection.AzureFunctions.csproj"
   BUILD_PLATFORM: "Any CPU"
   BUILD_CONFIGURATION: "Release" 
-  SHOULD_PUBLISH: ${{ github.ref == "refs/heads/master" }}
+  SHOULD_PUBLISH: ${{ github.ref == 'refs/heads/master' }}
   
 jobs:
   build:
@@ -51,13 +51,13 @@ jobs:
         
       - name: Publish Package
         id: "publish"
-        if: env.SHOULD_PUBLISH == "true" && success()
+        if: env.SHOULD_PUBLISH == 'true' && success()
         run: echo "Publish Test $PACKAGE_VERSION"; ls $PUBLISH_DIR;
         
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
-        if: env.SHOULD_PUBLISH == "true" && success()
+        if: env.SHOULD_PUBLISH == 'true' && success()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
