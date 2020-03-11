@@ -2,7 +2,7 @@
 
 Autofac is an [IoC container](http://martinfowler.com/articles/injection.html) for Microsoft .NET. It manages the dependencies between classes so that **applications stay easy to change as they grow** in size and complexity. This is achieved by treating regular .NET classes as *[components](https://autofac.readthedocs.io/en/latest/glossary.html)*.
 
-[![Build status](https://ci.appveyor.com/api/projects/status/1mhkjcqr1ug80lra/branch/develop?svg=true)](https://ci.appveyor.com/project/Autofac/autofac-extensions-dependencyinjection/branch/develop)
+![NuGet](https://github.com/junalmeida/autofac-azurefunctions/workflows/NuGet/badge.svg?branch=master)
 
 Please file issues and pull requests for this package in this repository rather than in the Autofac core repo.
 
