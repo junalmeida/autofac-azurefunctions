@@ -9,7 +9,7 @@ on:
 env:
   NUGET_NAME: "Autofac.Extensions.DependencyInjection.AzureFunctions"
   NUGET_SOURCE: "https://api.nuget.org/v3/index.json"
-  PACKAGE_PROJECT: "./${{ env.PROJECT_NAME }}/${{ env.PROJECT_NAME }}.csproj"
+  PACKAGE_PROJECT: "./Autofac.Extensions.DependencyInjection.AzureFunctions/Autofac.Extensions.DependencyInjection.AzureFunctions.csproj"
   BUILD_PLATFORM: "Any CPU"
   BUILD_CONFIGURATION: "Release" 
   SHOULD_PUBLISH: ${{ github.ref == 'refs/heads/master' }}
@@ -17,6 +17,7 @@ env:
   
 jobs:
   build:
+    name: "Build"
     runs-on: "ubuntu-latest"
      
     steps:
