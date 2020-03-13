@@ -9,29 +9,26 @@ namespace SampleAutofacFunction.Functions
     public class Function1 : IDisposable
     {
         private readonly IService1 _service1;
+        private readonly ILogger _logger;
         private readonly Guid _id = Guid.NewGuid();
 
-        public Function1(IService1 service1)
+        public Function1(IService1 service1, ILogger logger)
         {
             _service1 = service1;
-
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Creating {this}");
-            Console.ResetColor();
+            _logger = logger;
+            _logger.LogWarning($"Creating {this}");
         }
 
         public void Dispose()
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Disposing {this}");
-            Console.ResetColor();
+            _logger.LogWarning($"Disposing {this}");
         }
 
         [FunctionName(nameof(Function1))]
-        public async Task Run([QueueTrigger("myqueue-items", Connection = "AzureWebJobsStorage")]string myQueueItem, ILogger log)
+        public async Task Run([QueueTrigger("myqueue-items", Connection = "AzureWebJobsStorage")]string myQueueItem)
         {
             await Task.Delay(2000);
-            log.LogInformation($"C# Queue trigger function processed: {myQueueItem}");
+            _logger.LogInformation($"C# Queue trigger function processed: {myQueueItem}");
         }
 
         public override string ToString()

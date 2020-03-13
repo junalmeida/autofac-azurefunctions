@@ -4,6 +4,7 @@ using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using System;
 using System.IO;
 using System.Linq;
@@ -25,9 +26,19 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
         public static IFunctionsHostBuilder UseAutofacServiceProviderFactory(this IFunctionsHostBuilder hostBuilder, Action<ContainerBuilder> configurationAction = null)
         {
             var containerBuilder = new ContainerBuilder();
+            containerBuilder.Populate(hostBuilder.Services);
             configurationAction?.Invoke(containerBuilder);
 
-            containerBuilder.Populate(hostBuilder.Services);
+            containerBuilder
+                .Register((ctx, p) =>
+                {
+                    var factory = p.Named<ILoggerFactory>("loggerFactory") ?? ctx.Resolve<ILoggerFactory>();
+                    var functionName = p.Named<string>("functionName") ?? "Unknown";
+                    return factory.CreateLogger(Microsoft.Azure.WebJobs.Logging.LogCategories.CreateFunctionUserCategory(functionName));
+                })
+                .AsSelf()
+                .InstancePerTriggerRequest();
+
             var container = containerBuilder.Build();
 
             var scoped = new ScopedJobActivator(new AutofacServiceProvider(container));
