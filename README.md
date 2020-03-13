@@ -9,7 +9,7 @@ Please file issues and pull requests for this package in this repository rather 
 - [Documentation - .NET Core Integration](https://autofac.readthedocs.io/en/latest/integration/netcore.html)
 - [Documentation - ASP.NET Core Integration](https://autofac.readthedocs.io/en/latest/integration/aspnetcore.html)
 - [NuGet](https://www.nuget.org/packages/Autofac.Extensions.DependencyInjection.AzureFunctions)
-- [Contributing](https://autofac.readthedocs.io/en/latest/contributors.html)
+- Contributing - You can report problems and feature requests creating issues and pull requests on this project.
 
 ## Get Started in Azure Functions
 
@@ -54,11 +54,12 @@ public class Startup
             .SingleInstance();
 
         // Register all functions that resides in a given namespace
+        // The function class itself will be created using autofac
         builder
             .RegisterAssemblyTypes(typeof(Startup).Assembly)
             .InNamespace("MyNamespace.Functions")
-            .AsSelf()
-            .InstancePerTriggerRequest();
+            .AsSelf() // Azure Functions core code resolves a function class by itself.
+            .InstancePerTriggerRequest() // This will scope nested dependencies to each function execution
 
         builder
             .RegisterAssemblyTypes(typeof(Startup).Assembly)
@@ -67,10 +68,35 @@ public class Startup
             .InstancePerTriggerRequest();
 
     }
-
 }
 
 ```
+  
+
+This is a basic function example, observe that classes and functions are **not** declared as `static`: 
+
+
+```C#
+    public class Function1 : Disposable
+    {
+        public Function1(IService1 service1, ILogger logger)
+        {
+            // ...
+        }
+
+        [FunctionName(nameof(Function1))]
+        public async Task Run([QueueTrigger("myqueue-items", Connection = "AzureWebJobsStorage")]string myQueueItem)
+        {
+            await Task.Delay(2000);
+            _logger.LogInformation($"C# Queue trigger function processed: {myQueueItem}");
+        }
+
+        // ...
+    }
+```
+  
+  
+
 
 ## Get Help
 
