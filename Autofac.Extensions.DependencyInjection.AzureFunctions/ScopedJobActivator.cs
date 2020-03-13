@@ -31,14 +31,16 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
             // ILoggerFactory from Autofac container. 
             // So we are retrieving it from InstanceServices.
             var loggerFactory = functionInstance.InstanceServices.GetService<ILoggerFactory>() ?? scope.Resolve<ILoggerFactory>();
-            var functionName = functionInstance.FunctionDescriptor.ShortName;
+            scope.Resolve<ILoggerFactory>(
+                new NamedParameter(LoggerModule.loggerFactoryParam, loggerFactory)
+            );
 
             // This will create the same ILogger of a regular ILogger not using DI.
             // This ILogger is scoped under the function trigger and will be disposed
             // right after the code execution.
+            var functionName = functionInstance.FunctionDescriptor.ShortName;
             scope.Resolve<ILogger>(
-                new NamedParameter(nameof(loggerFactory), loggerFactory),
-                new NamedParameter(nameof(functionName), functionName)
+                new NamedParameter(LoggerModule.functionNameParam, functionName)
             );
 
             return CreateInstance<T>(scope);

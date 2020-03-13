@@ -27,24 +27,20 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
         {
             var containerBuilder = new ContainerBuilder();
             containerBuilder.Populate(hostBuilder.Services);
-            configurationAction?.Invoke(containerBuilder);
+            containerBuilder.RegisterModule<LoggerModule>();
 
-            containerBuilder
-                .Register((ctx, p) =>
-                {
-                    var factory = p.Named<ILoggerFactory>("loggerFactory") ?? ctx.Resolve<ILoggerFactory>();
-                    var functionName = p.Named<string>("functionName") ?? "Unknown";
-                    return factory.CreateLogger(Microsoft.Azure.WebJobs.Logging.LogCategories.CreateFunctionUserCategory(functionName));
-                })
-                .AsSelf()
-                .InstancePerTriggerRequest();
+            // Call the user code to configure the container
+            configurationAction?.Invoke(containerBuilder);
 
             var container = containerBuilder.Build();
 
             var scoped = new ScopedJobActivator(new AutofacServiceProvider(container));
+
+            // Replacing Azure Functions ServiceProvider
             hostBuilder.Services.Replace(ServiceDescriptor.Singleton(typeof(IJobActivator), scoped));
             hostBuilder.Services.Replace(ServiceDescriptor.Singleton(typeof(IJobActivatorEx), scoped));
 
+            // This will create a scoped execution when a function is triggered.
             hostBuilder.Services.AddScoped((provider) =>
             {
                 var lifetimeScope = container.BeginLifetimeScope(Scopes.RootLifetimeScopeTag);

@@ -7,11 +7,12 @@ namespace SampleAutofacFunction.Services
     {
         private readonly Guid _id = Guid.NewGuid();
         private readonly ILogger _logger;
+        private readonly ILoggerFactory _loggerFactory;
 
-        public Service2(ILogger logger)
+        public Service2(ILogger logger, ILoggerFactory loggerFactory)
         {
             _logger = logger;
-
+            _loggerFactory = loggerFactory;
             _logger.LogWarning($"Creating {this}");
         }
         public string Value { get; set; } = "Example injected service 2";
