@@ -14,31 +14,27 @@ namespace SampleAutofacFunction.Functions
     {
         private readonly IService1 _service1;
         private readonly MySettings _settings;
+        private readonly ILogger _logger;
         private readonly Guid _id = Guid.NewGuid();
 
-        public Function2(IService1 service1, MySettings settings)
+        public Function2(IService1 service1, MySettings settings, ILogger logger)
         {
             _service1 = service1;
             _settings = settings;
-
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Creating {this}");
-            Console.ResetColor();
+            _logger = logger;
+            _logger.LogWarning($"Creating {this}");
         }
 
         public void Dispose()
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine($"Disposing {this}");
-            Console.ResetColor();
+            _logger.LogWarning($"Disposing {this}");
         }
 
         [FunctionName(nameof(Function2))]
         public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
-            ILogger log)
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            _logger.LogInformation("C# HTTP trigger function processed a request.");
 
             string value = _service1.ToString();
 
@@ -51,7 +47,7 @@ UrlRequested: {req.Path}
 ";
 
             await Task.Delay(1000);
-            log.LogInformation(responseMessage);
+            _logger.LogInformation(responseMessage);
             return new OkObjectResult(responseMessage);
         }
 
