@@ -98,6 +98,24 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
             return hostBuilder;
         }
 
+
+        /// <summary>
+        /// Adds logging services to the specified HostBuilder
+        /// </summary>
+        /// <param name="hostBuilder">An instance of <see cref="IFunctionsHostBuilder"/>.</param>
+        /// <param name="configure">The <see cref="ILoggingBuilder"/> configuration delegate.</param>
+        /// <returns>The IFunctionsHostBuilder.</returns>
+        public static IFunctionsHostBuilder UseLogger(this IFunctionsHostBuilder hostBuilder, Action<ILoggingBuilder, IConfiguration> configure)
+        {
+            var configuration = hostBuilder.Services.Where(x => x.ServiceType == typeof(IConfiguration)).SingleOrDefault()?.ImplementationInstance as IConfiguration;
+
+            hostBuilder.Services.AddLogging((config) => configure?.Invoke(config, configuration));
+
+            return hostBuilder;
+        }
+
+
+
         /// <summary>
         /// Share one instance of the component within the context of a single
         /// azure function trigger request.

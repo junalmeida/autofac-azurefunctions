@@ -2,6 +2,7 @@
 using Autofac.Extensions.DependencyInjection.AzureFunctions;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using SampleAutofacFunction.Settings;
 
 [assembly: FunctionsStartup(typeof(SampleAutofacFunction.Startup))]
@@ -14,7 +15,13 @@ namespace SampleAutofacFunction
         {
             builder
                 .UseAppSettings()
+                .UseLogger(ConfigureLogger)
                 .UseAutofacServiceProviderFactory(ConfigureContainer);
+        }
+
+        private void ConfigureLogger(ILoggingBuilder builder, IConfiguration config)
+        {
+            builder.AddConfiguration(config.GetSection("Logging"));
         }
 
         private void ConfigureContainer(ContainerBuilder builder)
