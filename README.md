@@ -25,9 +25,11 @@ The `IServiceProvider` will automatically be created for you, so there's nothing
 
 
 ```C#
+using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+
 [assembly: FunctionsStartup(typeof(Startup))]
 
-public class Startup
+public class Startup : FunctionsStartup
 {
     public override void Configure(IFunctionsHostBuilder builder)
     {
