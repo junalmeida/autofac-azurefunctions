@@ -12,7 +12,7 @@ env:
   PACKAGE_PROJECT: "./Autofac.Extensions.DependencyInjection.AzureFunctions/Autofac.Extensions.DependencyInjection.AzureFunctions.csproj"
   BUILD_PLATFORM: "Any CPU"
   BUILD_CONFIGURATION: "Release" 
-  SHOULD_PUBLISH: ${{ github.ref == 'refs/heads/master' && !contains(github.event.push.commits.*.message, 'readme') }}
+  SHOULD_PUBLISH: ${{ github.ref == 'refs/heads/master' && !contains(github.event.commits.*.message, 'readme') }}
   PUBLISH_DIR: "${{ github.workspace }}/_publish"
   
 jobs:
