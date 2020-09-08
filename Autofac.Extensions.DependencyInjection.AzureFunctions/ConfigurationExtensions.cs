@@ -62,7 +62,10 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
             string currentDirectory = fileInfo.Directory.Parent.FullName;
 
             var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-            if (string.IsNullOrWhiteSpace(environment)) environment = "Development";
+            if (string.IsNullOrWhiteSpace(environment))
+                environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
+            if (string.IsNullOrWhiteSpace(environment))
+                environment = "Development"; // Fallback to Development when none is set.
 
             return UseAppSettings(hostBuilder, (builder) =>
             {
@@ -70,6 +73,7 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
                     .SetBasePath(currentDirectory)
                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                     .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
+                    .AddJsonFile("host.json", optional: true, reloadOnChange: true)
                     .AddEnvironmentVariables();
             });
         }

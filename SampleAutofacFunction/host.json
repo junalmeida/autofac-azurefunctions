@@ -7,5 +7,6 @@
                 "isEnabled": true
             }
         }
-    }
+    },
+    "functionTimeout": "00:10:00"
 }
