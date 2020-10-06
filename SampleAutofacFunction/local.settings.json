@@ -3,7 +3,6 @@
     "Values": {
         "AzureWebJobsStorage": "UseDevelopmentStorage=true",
         "FUNCTIONS_WORKER_RUNTIME": "dotnet",
-        "ASPNETCORE_ENVIRONMENT": "Production"
-
+        "ASPNETCORE_ENVIRONMENT": "Production",
     }
 }

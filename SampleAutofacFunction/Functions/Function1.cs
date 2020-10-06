@@ -25,7 +25,7 @@ namespace SampleAutofacFunction.Functions
         }
 
         [FunctionName(nameof(Function1))]
-        public async Task Run([QueueTrigger("myqueue-items", Connection = "AzureWebJobsStorage")]string myQueueItem)
+        public async Task Run([QueueTrigger("myqueue-items", Connection = "AzureWebJobsStorage")] string myQueueItem)
         {
             await Task.Delay(2000);
             _logger.LogInformation($"C# Queue trigger function processed: {myQueueItem}");
