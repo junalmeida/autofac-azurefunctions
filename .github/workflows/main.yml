@@ -61,8 +61,6 @@ jobs:
     name: "Deploy"
     runs-on: "ubuntu-latest"
     needs: build
-    env:
-      SHOULD_PUBLISH: ${{ env.SHOULD_PUBLISH }}
     if: ${{ github.ref == 'refs/heads/master' && !contains(github.event.push.commits.*.message, 'readme') }}
     environment: 
       name: nuget
