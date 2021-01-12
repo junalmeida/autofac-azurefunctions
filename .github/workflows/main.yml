@@ -35,9 +35,9 @@ jobs:
             
       - name: "Set Version Number"
         run: |
-          echo "::set-env name=VERSION_NUMBER::$(date -d ${{ steps.author-date.outputs.result }} +%Y.%m.%d.%H%M)";
+          echo "VERSION_NUMBER=$(date -d ${{ steps.author-date.outputs.result }} +%Y.%m.%d.%H%M)" >> $GITHUB_ENV
           PACKAGE_VERSION=$(cat "$PACKAGE_PROJECT" | grep -oPm1 "(?<=<PackageVersion>)[^<]+")
-          echo "::set-env name=PACKAGE_VERSION::$PACKAGE_VERSION.${{ github.run_number }}";
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION.${{ github.run_number }}" >> $GITHUB_ENV
 
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1.0.2
@@ -55,6 +55,9 @@ jobs:
       - name: Publish Package
         id: "publish"
         if: env.SHOULD_PUBLISH == 'true' && success()
+        environment: 
+          name: nuget
+          url: https://www.nuget.org/packages/${{ env.NUGET_NAME }}/${{ env.PACKAGE_VERSION }}
         run: |
           for f in $(find $PUBLISH_DIR -name '*.nupkg'); do 
             echo "Pushing $f...";
