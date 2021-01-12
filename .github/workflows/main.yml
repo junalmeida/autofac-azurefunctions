@@ -35,12 +35,12 @@ jobs:
             
       - name: "Set Version Number"
         run: |
-          echo "::set-env name=VERSION_NUMBER::$(date -d ${{ steps.author-date.outputs.result }} +%Y.%m.%d.%H%M)";
+          echo "VERSION_NUMBER=$(date -d ${{ steps.author-date.outputs.result }} +%Y.%m.%d.%H%M)" >> $GITHUB_ENV
           PACKAGE_VERSION=$(cat "$PACKAGE_PROJECT" | grep -oPm1 "(?<=<PackageVersion>)[^<]+")
-          echo "::set-env name=PACKAGE_VERSION::$PACKAGE_VERSION.${{ github.run_number }}";
+          echo "PACKAGE_VERSION=$PACKAGE_VERSION.${{ github.run_number }}" >> $GITHUB_ENV
 
       - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1.0.2
+        uses: NuGet/setup-nuget@v1
         with:
           nuget-version: "latest"
           nuget-api-key: ${{ secrets.NUGET_KEY }}
@@ -51,12 +51,29 @@ jobs:
 
       - name: Build
         run: msbuild -p:Configuration="$BUILD_CONFIGURATION" -p:Platform="$BUILD_PLATFORM" -m -p:GeneratePackageOnBuild=true -p:OutDir=$PUBLISH_DIR -p:Version=$VERSION_NUMBER -p:AssemblyVersion=$VERSION_NUMBER -p:AssemblyInformationalVersion=$VERSION_NUMBER -p:PackageVersion=$PACKAGE_VERSION -p:GenerateProjectSpecificOutputFolder=true
-        
+
+      - uses: actions/upload-artifact@v2
+        name: Upload artifact
+        if: ${{ env.SHOULD_PUBLISH == 'true' && success() }}
+        with:
+          path: ${{ env.PUBLISH_DIR }}/**/*.nupkg
+  deploy:
+    name: "Deploy"
+    runs-on: "ubuntu-latest"
+    needs: build
+    if: ${{ github.ref == 'refs/heads/master' && !contains(github.event.push.commits.*.message, 'readme') }}
+    environment: 
+      name: nuget
+      url: https://www.nuget.org/packages/${{ env.NUGET_NAME }}/${{ env.PACKAGE_VERSION }}
+    
+    steps:
+      - uses: actions/download-artifact@v2
+        name: Download artifact
+
       - name: Publish Package
         id: "publish"
-        if: env.SHOULD_PUBLISH == 'true' && success()
         run: |
-          for f in $(find $PUBLISH_DIR -name '*.nupkg'); do 
+          for f in $(find ./ -name '*.nupkg'); do 
             echo "Pushing $f...";
             nuget push "$f" -NonInteractive -Source "$NUGET_SOURCE";
           done;
@@ -64,7 +81,6 @@ jobs:
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
-        if: env.SHOULD_PUBLISH == 'true' && success()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
