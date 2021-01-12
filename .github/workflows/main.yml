@@ -40,7 +40,7 @@ jobs:
           echo "PACKAGE_VERSION=$PACKAGE_VERSION.${{ github.run_number }}" >> $GITHUB_ENV
 
       - name: Setup NuGet
-        uses: NuGet/setup-nuget@v1.0.2
+        uses: NuGet/setup-nuget@v1
         with:
           nuget-version: "latest"
           nuget-api-key: ${{ secrets.NUGET_KEY }}
