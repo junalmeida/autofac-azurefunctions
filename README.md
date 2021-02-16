@@ -61,7 +61,7 @@ public class Startup : FunctionsStartup
             .RegisterAssemblyTypes(typeof(Startup).Assembly)
             .InNamespace("MyNamespace.Functions")
             .AsSelf() // Azure Functions core code resolves a function class by itself.
-            .InstancePerTriggerRequest() // This will scope nested dependencies to each function execution
+            .InstancePerTriggerRequest(); // This will scope nested dependencies to each function execution
 
         builder
             .RegisterAssemblyTypes(typeof(Startup).Assembly)
