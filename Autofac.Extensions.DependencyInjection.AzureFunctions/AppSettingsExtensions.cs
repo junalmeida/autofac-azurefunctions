@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 
 namespace Autofac.Extensions.DependencyInjection.AzureFunctions
@@ -51,10 +50,13 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
         {
             var configurationBuilder = new ConfigurationBuilder() as IConfigurationBuilder;
 
-            var descriptor = hostBuilder.Services.FirstOrDefault(d => d.ServiceType == typeof(IConfiguration));
-            if (descriptor?.ImplementationInstance is IConfiguration configRoot)
+            using (var temporaryServiceProvider = hostBuilder.Services.BuildServiceProvider())
             {
-                configurationBuilder.AddConfiguration(configRoot);
+                var configRoot = temporaryServiceProvider.GetService<IConfiguration>();
+                if (configRoot != null)
+                {
+                    configurationBuilder.AddConfiguration(configRoot);
+                }
             }
 
             configurationAction?.Invoke(configurationBuilder);
