@@ -1,6 +1,4 @@
-﻿using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace Autofac.Extensions.DependencyInjection.AzureFunctions
 {
@@ -33,26 +31,6 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
                 .AsSelf()
                 .InstancePerTriggerRequest();
 
-
-            builder
-                .Register((ctx, p) =>
-                {
-                    var client = p.Named<TelemetryClient>(telemetryParam);
-
-                    return client;
-                })
-                .AsSelf()
-                .InstancePerTriggerRequest();
-
-            builder
-                .Register((ctx, p) =>
-                {
-                    var config = p.Named<TelemetryConfiguration>(telemetryParam);
-
-                    return config;
-                })
-                .AsSelf()
-                .InstancePerTriggerRequest();
         }
     }
 }

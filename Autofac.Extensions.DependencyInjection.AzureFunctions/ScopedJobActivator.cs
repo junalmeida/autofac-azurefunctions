@@ -1,6 +1,4 @@
-﻿using Microsoft.ApplicationInsights;
-using Microsoft.ApplicationInsights.Extensibility;
-using Microsoft.Azure.WebJobs.Host;
+﻿using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Azure.WebJobs.Host.Executors;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -44,22 +42,6 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
             scope.Resolve<ILogger>(
                 new NamedParameter(LoggerModule.functionNameParam, functionName)
             );
-
-            var telemetryClient = functionInstance.InstanceServices.GetService<TelemetryClient>();
-            if (telemetryClient != null)
-            {
-                scope.Resolve<TelemetryClient>(
-                    new NamedParameter(LoggerModule.telemetryParam, telemetryClient)
-                );
-            }
-            var telemetryConfiguration = functionInstance.InstanceServices.GetService<TelemetryConfiguration>();
-            if (telemetryConfiguration != null)
-            {
-                scope.Resolve<TelemetryConfiguration>(
-                    new NamedParameter(LoggerModule.telemetryParam, telemetryConfiguration)
-                );
-            }
-
 
             return CreateInstance<T>(scope);
         }
