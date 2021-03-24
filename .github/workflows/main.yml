@@ -72,6 +72,8 @@ jobs:
 
       - name: Publish Package
         id: "publish"
+        env:
+          $NUGET_KEY: ${{ secrets.$NUGET_KEY }} # Environment token
         run: |
           for f in $(find ./ -name '*.nupkg'); do 
             echo "Pushing $f...";
