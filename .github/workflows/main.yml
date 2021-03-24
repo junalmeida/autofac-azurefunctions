@@ -75,7 +75,7 @@ jobs:
         run: |
           for f in $(find ./ -name '*.nupkg'); do 
             echo "Pushing $f...";
-            nuget push "$f" -NonInteractive -Source "$NUGET_SOURCE";
+            nuget push "$f" -NonInteractive -Source "$NUGET_SOURCE" -ApiKey $NUGET_KEY;
           done;
         
       - name: Create Release
