@@ -1,3 +1,4 @@
+using Microsoft.ApplicationInsights;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -6,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using SampleAutofacFunction.Services;
 using SampleAutofacFunction.Settings;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace SampleAutofacFunction.Functions
@@ -15,13 +17,15 @@ namespace SampleAutofacFunction.Functions
         private readonly IService1 _service1;
         private readonly MySettings _settings;
         private readonly ILogger _logger;
+        private readonly TelemetryClient _client;
         private readonly Guid _id = Guid.NewGuid();
 
-        public Function2(IService1 service1, MySettings settings, ILogger logger)
+        public Function2(IService1 service1, MySettings settings, ILogger logger, TelemetryClient client)
         {
             _service1 = service1;
             _settings = settings;
             _logger = logger;
+            _client = client;
             _logger.LogWarning($"Creating {this}");
         }
 
@@ -45,6 +49,14 @@ MySettings Value1: {_settings.Value1}
 MySettings Value2: {_settings.Value2}
 UrlRequested: {req.Path}
 ";
+
+            _client.TrackEvent("HTTP Function Event", new Dictionary<string, string>() {
+                { "Injected Service Value", value },
+                { "MySettings Value1", _settings.Value1 },
+                { "MySettings Value2", _settings.Value2 },
+                { "UrlRequested", req.Path}
+            });
+
 
             await Task.Delay(1000);
             _logger.LogInformation(responseMessage);

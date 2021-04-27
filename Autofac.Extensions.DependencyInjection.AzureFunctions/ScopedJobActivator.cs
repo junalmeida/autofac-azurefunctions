@@ -17,14 +17,14 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
 
         public T CreateInstance<T>()
         {
-            var scope = _serviceProvider.GetService<ILifetimeScope>();
+            var scope = _serviceProvider.GetRequiredService<ScopedContainer>().Scope;
 
             return CreateInstance<T>(scope);
         }
 
         public T CreateInstance<T>(IFunctionInstanceEx functionInstance)
         {
-            var scope = functionInstance.InstanceServices.GetService<ILifetimeScope>() ?? _serviceProvider.GetService<ILifetimeScope>();
+            var scope = functionInstance.InstanceServices.GetService<ScopedContainer>()?.Scope ?? _serviceProvider.GetRequiredService<ScopedContainer>()?.Scope;
 
             // Some dependencies of ILoggerFactory are registered after 
             // FunctionsStartup, thus not allowing us to get the 

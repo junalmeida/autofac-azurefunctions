@@ -19,30 +19,59 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
         /// <returns>The IFunctionsHostBuilder.</returns>
         public static IFunctionsHostBuilder UseAutofacServiceProviderFactory(this IFunctionsHostBuilder hostBuilder, Action<ContainerBuilder> configurationAction = null)
         {
-            var containerBuilder = new ContainerBuilder();
-            containerBuilder.Populate(hostBuilder.Services);
-            containerBuilder.RegisterModule<LoggerModule>();
-
-            // Call the user code to configure the container
-            configurationAction?.Invoke(containerBuilder);
-
-            var container = containerBuilder.Build();
-
-            var scoped = new ScopedJobActivator(new AutofacServiceProvider(container));
-
-            // Replacing Azure Functions ServiceProvider
-            hostBuilder.Services.Replace(ServiceDescriptor.Singleton(typeof(IJobActivator), scoped));
-            hostBuilder.Services.Replace(ServiceDescriptor.Singleton(typeof(IJobActivatorEx), scoped));
-
-            // This will create a scoped execution when a function is triggered.
-            hostBuilder.Services.AddScoped((provider) =>
+            // Adding as a Singleton service will make sure post-registered
+            // services like TelemetryClient will be in the scope.
+            hostBuilder.Services.AddSingleton((ctx) =>
             {
-                var lifetimeScope = container.BeginLifetimeScope(Scopes.RootLifetimeScopeTag);
+                var containerBuilder = new ContainerBuilder();
 
-                return lifetimeScope;
+                containerBuilder.Populate(hostBuilder.Services);
+                containerBuilder.RegisterModule<LoggerModule>();
+
+                // Call the user code to configure the container
+                configurationAction?.Invoke(containerBuilder);
+
+                var container = containerBuilder.Build();
+                return new AutofacContainer(container);
             });
 
+            // Replacing Azure Functions ServiceProvider
+            hostBuilder.Services.Replace(ServiceDescriptor.Singleton(typeof(IJobActivator), typeof(ScopedJobActivator)));
+            hostBuilder.Services.Replace(ServiceDescriptor.Singleton(typeof(IJobActivatorEx), typeof(ScopedJobActivator)));
+
+            // This will create a scoped execution when a function is triggered.
+            hostBuilder.Services.AddScoped<ScopedContainer>();
+
             return hostBuilder;
+        }
+    }
+
+    internal class AutofacContainer : IDisposable
+    {
+        public IContainer Container { get; }
+
+        public AutofacContainer(IContainer container)
+        {
+            Container = container;
+        }
+
+        public void Dispose()
+        {
+            Container.Dispose();
+        }
+    }
+
+    internal class ScopedContainer : IDisposable
+    {
+        public ILifetimeScope Scope { get; }
+        public ScopedContainer(AutofacContainer container)
+        {
+            Scope = container.Container.BeginLifetimeScope(Scopes.RootLifetimeScopeTag);
+        }
+
+        public void Dispose()
+        {
+            Scope.Dispose();
         }
     }
 }
