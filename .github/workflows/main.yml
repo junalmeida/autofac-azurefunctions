@@ -19,7 +19,8 @@ jobs:
   build:
     name: "Build"
     runs-on: "ubuntu-latest"
-     
+    outputs:
+      PACKAGE_VERSION: ${{ steps.version-number.outputs.PACKAGE_VERSION }}    
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -34,10 +35,12 @@ jobs:
             return commit_details.data.author.date
             
       - name: "Set Version Number"
+        id: version-number
         run: |
           echo "VERSION_NUMBER=$(date -d ${{ steps.author-date.outputs.result }} +%Y.%m.%d.%H%M)" >> $GITHUB_ENV
           PACKAGE_VERSION=$(cat "$PACKAGE_PROJECT" | grep -oPm1 "(?<=<PackageVersion>)[^<]+")
           echo "PACKAGE_VERSION=$PACKAGE_VERSION.${{ github.run_number }}" >> $GITHUB_ENV
+          echo "::set-output name=PACKAGE_VERSION::$PACKAGE_VERSION.${{ github.run_number }}"
 
       - name: Setup NuGet
         uses: NuGet/setup-nuget@v1
@@ -64,7 +67,7 @@ jobs:
     if: ${{ github.ref == 'refs/heads/master' && !contains(github.event.push.commits.*.message, 'readme') }}
     environment: 
       name: nuget
-      url: https://www.nuget.org/packages/${{ env.NUGET_NAME }}/${{ env.PACKAGE_VERSION }}
+      url: https://www.nuget.org/packages/${{ env.NUGET_NAME }}/${{ needs.build.outputs.PACKAGE_VERSION }}
     
     steps:
       - uses: actions/download-artifact@v2
@@ -79,17 +82,17 @@ jobs:
             echo "Pushing $f...";
             nuget push "$f" -NonInteractive -Source "$NUGET_SOURCE" -ApiKey $NUGET_KEY;
           done;
-        
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          tag_name: "v${{ env.PACKAGE_VERSION }}"
-          release_name: ${{ env.PACKAGE_VERSION }}
+          tag_name: "v${{ needs.build.outputs.PACKAGE_VERSION }}"
+          release_name: ${{ needs.build.outputs.PACKAGE_VERSION }}
           body: |
-            Changes in this [Release](https://www.nuget.org/packages/${{ env.NUGET_NAME }}/${{ env.PACKAGE_VERSION }})
+            Changes in this [Release](https://www.nuget.org/packages/${{ env.NUGET_NAME }}/${{ needs.build.outputs.PACKAGE_VERSION }})
             ${{ github.event.head_commit.message }}
           draft: false
           prerelease: false
