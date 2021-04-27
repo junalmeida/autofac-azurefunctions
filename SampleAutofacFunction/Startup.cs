@@ -22,6 +22,7 @@ namespace SampleAutofacFunction
         private void ConfigureLogger(ILoggingBuilder builder, IConfiguration config)
         {
             builder.AddConfiguration(config.GetSection("Logging"));
+            builder.AddApplicationInsightsWebJobs();
         }
 
         private void ConfigureContainer(ContainerBuilder builder)
