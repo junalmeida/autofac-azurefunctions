@@ -14,15 +14,19 @@ namespace SampleAutofacFunction
         public override void Configure(IFunctionsHostBuilder builder)
         {
             builder
-                .UseAppSettings()
                 .UseLogger(ConfigureLogger)
                 .UseAutofacServiceProviderFactory(ConfigureContainer);
         }
 
-        private void ConfigureLogger(ILoggingBuilder builder, IConfiguration config)
+        private void ConfigureLogger(ILoggingBuilder builder, IFunctionsHostBuilder hostBuilder)
         {
-            builder.AddConfiguration(config.GetSection("Logging"));
+            builder.AddConfiguration(hostBuilder.GetContext().Configuration.GetSection("Logging"));
             builder.AddApplicationInsightsWebJobs();
+        }
+
+        public override void ConfigureAppConfiguration(IFunctionsConfigurationBuilder builder)
+        {
+            builder.UseAppSettings();
         }
 
         private void ConfigureContainer(ContainerBuilder builder)

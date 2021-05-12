@@ -1,10 +1,7 @@
 ﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
 using System.IO;
-using System.Reflection;
 
 namespace Autofac.Extensions.DependencyInjection.AzureFunctions
 {
@@ -16,55 +13,49 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
         /// <summary>
         /// Creates an <see cref="IConfiguration"/> instance and attaches to an `appsettings.json` file, also adding an `appsettings.{environment}.json` on top of it, if available, based on current ASPNETCORE_ENVIRONMENT environment variable.
         /// </summary>
-        /// <param name="hostBuilder">An instance of <see cref="IFunctionsHostBuilder"/>.</param>
+        /// <param name="builder">An instance of <see cref="IFunctionsConfigurationBuilder"/>.</param>
         /// <returns>The IFunctionsHostBuilder.</returns>
-        public static IFunctionsHostBuilder UseAppSettings(this IFunctionsHostBuilder hostBuilder)
+        public static IFunctionsConfigurationBuilder UseAppSettings(this IFunctionsConfigurationBuilder builder)
         {
-            var fileInfo = new FileInfo(Assembly.GetExecutingAssembly().Location);
-            string currentDirectory = fileInfo.Directory.Parent.FullName;
+            var context = builder.GetContext();
+            builder.ConfigurationBuilder
+                .AddJsonFile(Path.Combine(context.ApplicationRootPath, "appsettings.json"), optional: true, reloadOnChange: false)
+                .AddJsonFile(Path.Combine(context.ApplicationRootPath, $"appsettings.{builder.GetCurrentEnvironmentName()}.json"), optional: true, reloadOnChange: false)
+                .AddEnvironmentVariables();
 
-            var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
-            if (string.IsNullOrWhiteSpace(environment))
-                environment = Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT");
-            if (string.IsNullOrWhiteSpace(environment))
-                environment = "Development"; // Fallback to Development when none is set.
-
-            return UseAppSettings(hostBuilder, (builder) =>
-            {
-                builder
-                    .SetBasePath(currentDirectory)
-                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                    .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: true)
-                    .AddJsonFile("host.json", optional: true, reloadOnChange: true)
-                    .AddEnvironmentVariables();
-            });
+            return builder;
         }
 
         /// <summary>
-        /// Creates an <see cref="IConfiguration"/> instance and configures it as declared by <paramref name="configurationAction"/> action.
+        /// Calculate environment from unreliable function environment setting. 
+        /// github.com/Azure/azure-functions-host/issues/6239 problem determining environment.
         /// </summary>
-        /// <param name="hostBuilder">An instance of <see cref="IFunctionsHostBuilder"/>.</param>
-        /// <param name="configurationAction">Action on a <see cref="IConfigurationBuilder"/> that adds configurations to a .NET Core application.</param>
-        /// <returns>The IFunctionsHostBuilder.</returns>
-        public static IFunctionsHostBuilder UseAppSettings(this IFunctionsHostBuilder hostBuilder, Action<IConfigurationBuilder> configurationAction = null)
+        /// <param name="builder"></param>
+        /// <returns></returns>
+        public static string GetCurrentEnvironmentName(this IFunctionsHostBuilder builder)
         {
-            var configurationBuilder = new ConfigurationBuilder() as IConfigurationBuilder;
+            return GetCurrentEnvironmentName(builder.GetContext().EnvironmentName);
+        }
 
-            using (var temporaryServiceProvider = hostBuilder.Services.BuildServiceProvider())
-            {
-                var configRoot = temporaryServiceProvider.GetService<IConfiguration>();
-                if (configRoot != null)
-                {
-                    configurationBuilder.AddConfiguration(configRoot);
-                }
-            }
+        /// <summary>
+        /// Calculate environment from unreliable function environment setting.
+        /// github.com/Azure/azure-functions-host/issues/6239 problem determining environment.
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <returns></returns>
+        public static string GetCurrentEnvironmentName(this IFunctionsConfigurationBuilder builder)
+        {
+            return GetCurrentEnvironmentName(builder.GetContext().EnvironmentName);
+        }
 
-            configurationAction?.Invoke(configurationBuilder);
-            var configuration = configurationBuilder.Build();
+        private static string GetCurrentEnvironmentName(string contextEnvironmentName)
+        {
 
-            hostBuilder.Services.Replace(ServiceDescriptor.Singleton(typeof(IConfiguration), configuration));
-
-            return hostBuilder;
+            string environmentName = Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") ??
+                                     Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ??
+                                     Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ??
+                                     contextEnvironmentName ?? "Development";
+            return environmentName;
         }
     }
 }
