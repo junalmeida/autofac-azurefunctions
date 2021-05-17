@@ -1,5 +1,6 @@
 ﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using System;
 using System.IO;
 
@@ -55,7 +56,8 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
             string environmentName = Environment.GetEnvironmentVariable("AZURE_FUNCTIONS_ENVIRONMENT") ??
                                      Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ??
                                      Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ??
-                                     contextEnvironmentName ?? "Development";
+                                     contextEnvironmentName ??
+                                     EnvironmentName.Development;
             return environmentName;
         }
     }
