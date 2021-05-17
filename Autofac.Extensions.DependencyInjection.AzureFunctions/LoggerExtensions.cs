@@ -1,4 +1,5 @@
 ﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
@@ -16,9 +17,11 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
         /// <param name="hostBuilder">An instance of <see cref="IFunctionsHostBuilder"/>.</param>
         /// <param name="configure">The <see cref="ILoggingBuilder"/> configuration delegate.</param>
         /// <returns>The IFunctionsHostBuilder.</returns>
-        public static IFunctionsHostBuilder UseLogger(this IFunctionsHostBuilder hostBuilder, Action<ILoggingBuilder, IFunctionsHostBuilder> configure)
+        public static IFunctionsHostBuilder UseLogger(this IFunctionsHostBuilder hostBuilder, Action<ILoggingBuilder, IConfiguration> configure)
         {
-            hostBuilder.Services.AddLogging((config) => configure?.Invoke(config, hostBuilder));
+            var configuration = hostBuilder.GetContext().Configuration;
+
+            hostBuilder.Services.AddLogging((config) => configure?.Invoke(config, configuration));
             return hostBuilder;
         }
     }

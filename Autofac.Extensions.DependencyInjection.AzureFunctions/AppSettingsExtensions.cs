@@ -11,16 +11,17 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
     public static class AppSettingsExtensions
     {
         /// <summary>
-        /// Creates an <see cref="IConfiguration"/> instance and attaches to an `appsettings.json` file, also adding an `appsettings.{environment}.json` on top of it, if available, based on current ASPNETCORE_ENVIRONMENT environment variable.
+        /// Creates an <see cref="IConfiguration"/> instance and attaches to an `appsettings.json` file, also adding an `appsettings.{environment}.json` on top of it, if available, based on current AZURE_FUNCTIONS_ENVIRONMENT environment variable.
         /// </summary>
         /// <param name="builder">An instance of <see cref="IFunctionsConfigurationBuilder"/>.</param>
-        /// <returns>The IFunctionsHostBuilder.</returns>
-        public static IFunctionsConfigurationBuilder UseAppSettings(this IFunctionsConfigurationBuilder builder)
+        /// <param name="reloadOnChange">Whether the configuration should be reloaded on file change.</param>
+        /// <returns>The <see cref="IFunctionsConfigurationBuilder"/>.</returns>
+        public static IFunctionsConfigurationBuilder UseAppSettings(this IFunctionsConfigurationBuilder builder, bool reloadOnChange = false)
         {
             var context = builder.GetContext();
             builder.ConfigurationBuilder
-                .AddJsonFile(Path.Combine(context.ApplicationRootPath, "appsettings.json"), optional: true, reloadOnChange: false)
-                .AddJsonFile(Path.Combine(context.ApplicationRootPath, $"appsettings.{builder.GetCurrentEnvironmentName()}.json"), optional: true, reloadOnChange: false)
+                .AddJsonFile(Path.Combine(context.ApplicationRootPath, "appsettings.json"), optional: true, reloadOnChange: reloadOnChange)
+                .AddJsonFile(Path.Combine(context.ApplicationRootPath, $"appsettings.{builder.GetCurrentEnvironmentName()}.json"), optional: true, reloadOnChange: reloadOnChange)
                 .AddEnvironmentVariables();
 
             return builder;
