@@ -21,9 +21,9 @@ namespace SampleAutofacFunction
                 .UseAutofacServiceProviderFactory(ConfigureContainer);
         }
 
-        private void ConfigureLogger(ILoggingBuilder builder, IConfiguration configuration)
+        private void ConfigureLogger(ILoggingBuilder builder, IConfiguration config)
         {
-            builder.AddConfiguration(configuration.GetSection("Logging"));
+            builder.AddConfiguration(config.GetSection("Logging"));
         }
 
         public override void ConfigureAppConfiguration(IFunctionsConfigurationBuilder builder)
