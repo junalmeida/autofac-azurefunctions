@@ -6,7 +6,6 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
     {
         public const string functionNameParam = "functionName";
         public const string loggerFactoryParam = "loggerFactory";
-        public const string telemetryParam = "telemetry";
 
         protected override void Load(ContainerBuilder builder)
         {

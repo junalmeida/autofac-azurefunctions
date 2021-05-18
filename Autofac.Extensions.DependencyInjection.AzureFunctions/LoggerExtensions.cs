@@ -3,7 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Linq;
 
 namespace Autofac.Extensions.DependencyInjection.AzureFunctions
 {
@@ -20,10 +19,9 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
         /// <returns>The IFunctionsHostBuilder.</returns>
         public static IFunctionsHostBuilder UseLogger(this IFunctionsHostBuilder hostBuilder, Action<ILoggingBuilder, IConfiguration> configure)
         {
-            var configuration = hostBuilder.Services.Where(x => x.ServiceType == typeof(IConfiguration)).SingleOrDefault()?.ImplementationInstance as IConfiguration;
+            var configuration = hostBuilder.GetContext().Configuration;
 
             hostBuilder.Services.AddLogging((config) => configure?.Invoke(config, configuration));
-
             return hostBuilder;
         }
     }

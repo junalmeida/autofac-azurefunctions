@@ -34,8 +34,16 @@ public class Startup : FunctionsStartup
     public override void Configure(IFunctionsHostBuilder builder)
     {
         builder
-            .UseAppSettings() // this is optional, this will bind IConfiguration in the container.
+            // This is the required call in order to use autofac in your azure functions app
             .UseAutofacServiceProviderFactory(ConfigureContainer);
+    }
+
+    public override void ConfigureAppConfiguration(IFunctionsConfigurationBuilder builder)
+    {
+        // this is optional and will bind IConfiguration with appsettings.json in
+        // the container, like it is usually done in regular dotnet console and
+        // web applications.
+        builder.UseAppSettings();
     }
 
     private void ConfigureContainer(ContainerBuilder builder)
@@ -45,15 +53,23 @@ public class Startup : FunctionsStartup
             {
                 // Example on how to bind settings from appsettings.json
                 // to a class instance
-                var mySettings = new MySettings();
+                var section = activator.Resolve<IConfiguration>().GetSection(nameof(MySettings));
 
-                var config = activator.Resolve<IConfiguration>();
-                config.GetSection(nameof(MySettings)).Bind(mySettings);
+                var instance = section.Get<MySettings>();
 
-                return mySettings;
+                // If you expect IConfiguration to change (with reloadOnChange=true), use
+                // token to rebind.
+                ChangeToken.OnChange(
+                    () => section.GetReloadToken(),
+                    (state) => section.Bind(state),
+                    instance);
+
+                return instance;
             })
             .AsSelf()
             .SingleInstance();
+
+
 
         // Register all functions that resides in a given namespace
         // The function class itself will be created using autofac
