@@ -1,3 +1,5 @@
+using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
 using SampleAutofacFunction.Services;
@@ -10,12 +12,14 @@ namespace SampleAutofacFunction.Functions
     {
         private readonly IService1 _service1;
         private readonly ILogger _logger;
+        private readonly TelemetryClient _client;
         private readonly Guid _id = Guid.NewGuid();
 
-        public Function1(IService1 service1, ILogger logger)
+        public Function1(IService1 service1, ILogger logger, TelemetryClient client)
         {
             _service1 = service1;
             _logger = logger;
+            _client = client;
             _logger.LogWarning($"Creating {this}");
         }
 
@@ -27,7 +31,11 @@ namespace SampleAutofacFunction.Functions
         [FunctionName(nameof(Function1))]
         public async Task Run([QueueTrigger("myqueue-items", Connection = "AzureWebJobsStorage")] string myQueueItem)
         {
-            await Task.Delay(2000);
+            using (_client.StartOperation(new DependencyTelemetry("HTTP", "Fake HTTP dependency", "Delay", _id.ToString())))
+            {
+                await Task.Delay(2000);
+            }
+
             _logger.LogInformation($"C# Queue trigger function processed: {myQueueItem}");
         }
 

@@ -1,4 +1,5 @@
 using Microsoft.ApplicationInsights;
+using Microsoft.ApplicationInsights.DataContracts;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -58,7 +59,11 @@ UrlRequested: {req.Path}
             });
 
 
-            await Task.Delay(1000);
+            using (_client.StartOperation(new DependencyTelemetry("HTTP", "Fake HTTP dependency", "Delay", _id.ToString())))
+            {
+                await Task.Delay(1000);
+            }
+
             _logger.LogInformation(responseMessage);
             return new OkObjectResult(responseMessage);
         }
