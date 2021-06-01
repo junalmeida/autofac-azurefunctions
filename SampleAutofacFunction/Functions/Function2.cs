@@ -62,6 +62,10 @@ UrlRequested: {req.Path}
             using (_client.StartOperation(new DependencyTelemetry("HTTP", "Fake HTTP dependency", "Delay", _id.ToString())))
             {
                 await Task.Delay(1000);
+                // make it fail randomly to test app insights exceptions.
+                if (new Random().Next(0, 4) == 1)
+                    throw new InvalidOperationException("Random exception to test application insights.");
+
             }
 
             _logger.LogInformation(responseMessage);
