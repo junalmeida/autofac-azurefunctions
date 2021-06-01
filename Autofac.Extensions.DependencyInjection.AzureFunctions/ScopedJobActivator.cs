@@ -9,6 +9,8 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
     internal class ScopedJobActivator : IJobActivator, IJobActivatorEx
     {
         private readonly IServiceProvider _serviceProvider;
+        private static bool singletonsAlreadySet = false;
+        private static object lockObj = new Object();
 
         public ScopedJobActivator(IServiceProvider serviceProvider)
         {
@@ -26,14 +28,27 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
         {
             var scope = functionInstance.InstanceServices.GetService<ScopedContainer>()?.Scope ?? _serviceProvider.GetRequiredService<ScopedContainer>()?.Scope;
 
-            // Some dependencies of ILoggerFactory are registered after 
-            // FunctionsStartup, thus not allowing us to get the 
-            // ILoggerFactory from Autofac container. 
-            // So we are retrieving it from InstanceServices.
-            var loggerFactory = functionInstance.InstanceServices.GetService<ILoggerFactory>() ?? scope.Resolve<ILoggerFactory>();
-            scope.Resolve<ILoggerFactory>(
-                new NamedParameter(LoggerModule.loggerFactoryParam, loggerFactory)
-            );
+            if (!singletonsAlreadySet)
+                lock (lockObj)
+                {
+                    // Some dependencies of ILoggerFactory are registered after 
+                    // FunctionsStartup, thus not allowing us to get the 
+                    // ILoggerFactory from Autofac container. 
+                    // So we are retrieving it from InstanceServices.
+                    var loggerFactory = functionInstance.InstanceServices.GetService<ILoggerFactory>() ?? scope.Resolve<ILoggerFactory>();
+                    scope.Resolve<ILoggerFactory>(
+                        new NamedParameter(LoggerModule.loggerFactoryParam, loggerFactory)
+                    );
+
+                    // This will resolve TelemetryClient on a real Azure Function server
+
+                    var client = functionInstance.InstanceServices.GetRequiredService(LoggerModule.telemetryType);
+
+                    scope.Resolve(LoggerModule.telemetryType,
+                        new NamedParameter(LoggerModule.telemetryClientParam, client)
+                    );
+                    singletonsAlreadySet = true;
+                }
 
             // This will create the same ILogger of a regular ILogger not using DI.
             // This ILogger is scoped under the function trigger and will be disposed
@@ -42,6 +57,8 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
             scope.Resolve<ILogger>(
                 new NamedParameter(LoggerModule.functionNameParam, functionName)
             );
+
+
 
             return CreateInstance<T>(scope);
         }

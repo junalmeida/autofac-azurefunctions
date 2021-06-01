@@ -1,4 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
 
 namespace Autofac.Extensions.DependencyInjection.AzureFunctions
 {
@@ -6,6 +8,13 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
     {
         public const string functionNameParam = "functionName";
         public const string loggerFactoryParam = "loggerFactory";
+        public const string telemetryClientParam = "telemetryConfiguration";
+        public static readonly Type telemetryType = AppDomain.CurrentDomain
+            .GetAssemblies()
+            .Where(a => !a.IsDynamic)
+            .SelectMany(x => x.GetExportedTypes())
+            .Where(x => x.FullName == "Microsoft.ApplicationInsights.TelemetryClient")
+            .FirstOrDefault();
 
         protected override void Load(ContainerBuilder builder)
         {
@@ -29,6 +38,18 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
                 })
                 .AsSelf()
                 .InstancePerTriggerRequest();
+
+
+
+            builder
+                .Register((ctx, p) =>
+                {
+                    var obj = p.Named<object>(telemetryClientParam);
+
+                    return obj;
+                })
+                .As(telemetryType)
+                .SingleInstance();
 
         }
     }
