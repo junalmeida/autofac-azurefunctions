@@ -121,4 +121,4 @@ This is a basic function example, observe that classes and functions are **not**
 - [Documentation - .NET Core Integration](https://autofac.readthedocs.io/en/latest/integration/netcore.html)   
 - [Documentation - ASP.NET Core Integration](https://autofac.readthedocs.io/en/latest/integration/aspnetcore.html)  
 
-Before heading to their support channels, make sure your issue is related to the main official library by creating an isolated test project without this package.
+**Before heading to their support channels, make sure your issue is related to the main official library** by creating an isolated test project without this package.
