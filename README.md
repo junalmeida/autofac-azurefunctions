@@ -2,12 +2,13 @@
 
 Autofac is an [IoC container](http://martinfowler.com/articles/injection.html) for Microsoft .NET. It manages the dependencies between classes so that **applications stay easy to change as they grow** in size and complexity. This is achieved by treating regular .NET classes as *[components](https://autofac.readthedocs.io/en/latest/glossary.html)*.
 
+This library has been created to allow Azure Functions v3 users to use AutoFac library in a common way like it is done with regular web projects. 
+Note that Azure Functions moving forward has now a NET 5 `dotnet-isolated` mode which allows the use of Autofac directly without this library.   
+
 ![NuGet](https://github.com/junalmeida/autofac-azurefunctions/workflows/NuGet/badge.svg?branch=master)
 
 Please file issues and pull requests for this package in this repository rather than in the Autofac core repo.
 
-- [Documentation - .NET Core Integration](https://autofac.readthedocs.io/en/latest/integration/netcore.html)
-- [Documentation - ASP.NET Core Integration](https://autofac.readthedocs.io/en/latest/integration/aspnetcore.html)
 - [NuGet](https://www.nuget.org/packages/Autofac.Extensions.DependencyInjection.AzureFunctions)
 - Contributing - You can report problems and feature requests creating issues and pull requests on this project.
 
@@ -112,10 +113,12 @@ This is a basic function example, observe that classes and functions are **not**
         // ...
     }
 ```
-  
-  
 
 
-## Get Help
+## Get Help from Autofac Official Library
 
-**Need help with Autofac?** We have [a documentation site](https://autofac.readthedocs.io/) as well as [API documentation](https://autofac.org/apidoc/). We're ready to answer your questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/autofac) or check out the [discussion forum](https://groups.google.com/forum/#forum/autofac).
+**Need help with Autofac?** They have [a documentation site](https://autofac.readthedocs.io/) as well as [API documentation](https://autofac.org/apidoc/). They're ready to answer your questions on [Stack Overflow](https://stackoverflow.com/questions/tagged/autofac) or check out the [discussion forum](https://groups.google.com/forum/#forum/autofac).   
+- [Documentation - .NET Core Integration](https://autofac.readthedocs.io/en/latest/integration/netcore.html)   
+- [Documentation - ASP.NET Core Integration](https://autofac.readthedocs.io/en/latest/integration/aspnetcore.html)  
+
+**Before heading to their support channels, make sure your issue is related to the main official library** by creating an isolated test project without this package.
