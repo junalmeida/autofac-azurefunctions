@@ -1,8 +1,10 @@
 ﻿using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Azure.WebJobs.Host;
+using Microsoft.Azure.WebJobs.Host.Executors;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
+using System.Linq;
 
 namespace Autofac.Extensions.DependencyInjection.AzureFunctions
 {
@@ -11,6 +13,10 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
     /// </summary>
     public static class ConfigurationExtensions
     {
+        internal const string functionInstanceParam = "functionInstance";
+        internal const string iEnvironmentParam = "iEnvironment";
+
+        internal static Type IEnvironmentType;
         /// <summary>
         /// Attatch the <see cref="AutofacServiceProvider"/> to the <see cref="IFunctionsHostBuilder"/> of the current function host.
         /// </summary>
@@ -30,6 +36,27 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
 
                 // Call the user code to configure the container
                 configurationAction?.Invoke(containerBuilder);
+
+                IEnvironmentType = hostBuilder.Services.Where(s => s.ServiceType.Namespace == "Microsoft.Azure.WebJobs.Script").FirstOrDefault()?.ServiceType.Assembly.GetExportedTypes().Where(x => x.Name == "IEnvironment").FirstOrDefault();
+                if (IEnvironmentType != null)
+                {
+                    containerBuilder.Register((r, p) =>
+                    {
+                        var instance = p.Named<object>(iEnvironmentParam);
+                        return instance;
+                    }).As(IEnvironmentType)
+                    .ExternallyOwned()
+                    .SingleInstance();
+                }
+
+                containerBuilder.Register((r, p) =>
+                {
+                    var instance = p.Named<IFunctionInstanceEx>(functionInstanceParam);
+                    return instance;
+                })
+                .AsSelf()
+                .ExternallyOwned()
+                .InstancePerTriggerRequest();
 
                 var container = containerBuilder.Build();
                 return new AutofacContainer(container);
@@ -66,7 +93,7 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
         public ILifetimeScope Scope { get; }
         public ScopedContainer(AutofacContainer container)
         {
-            Scope = container.Container.BeginLifetimeScope(Scopes.RootLifetimeScopeTag);
+            Scope = container.Container.BeginLifetimeScope(Scopes.LifetimeScopeTag);
         }
 
         public void Dispose()

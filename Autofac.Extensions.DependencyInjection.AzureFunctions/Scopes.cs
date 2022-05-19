@@ -1,6 +1,6 @@
-﻿using Autofac.Builder;
-using System;
+﻿using System;
 using System.Linq;
+using Autofac.Builder;
 
 namespace Autofac.Extensions.DependencyInjection.AzureFunctions
 {
@@ -12,7 +12,7 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
         /// <summary>
         /// Represents the scope of a function trigger request.
         /// </summary>
-        public const string RootLifetimeScopeTag = "AutofacFunctionsScope";
+        public const string LifetimeScopeTag = "AutofacFunctionsScope";
 
         /// <summary>
         /// Share one instance of the component within the context of a single
@@ -32,7 +32,7 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
             if (registration == null)
                 throw new ArgumentNullException(nameof(registration));
 
-            var tags = new[] { Scopes.RootLifetimeScopeTag }.Concat(lifetimeScopeTags).ToArray();
+            var tags = new[] { Scopes.LifetimeScopeTag }.Concat(lifetimeScopeTags).ToArray();
             return registration.InstancePerMatchingLifetimeScope(tags);
         }
 

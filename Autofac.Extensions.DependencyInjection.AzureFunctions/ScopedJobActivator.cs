@@ -3,6 +3,7 @@ using Microsoft.Azure.WebJobs.Host.Executors;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics;
 
 namespace Autofac.Extensions.DependencyInjection.AzureFunctions
 {
@@ -25,10 +26,9 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
         public T CreateInstance<T>(IFunctionInstanceEx functionInstance)
         {
             var scope = functionInstance.InstanceServices.GetService<ScopedContainer>()?.Scope ?? _serviceProvider.GetRequiredService<ScopedContainer>()?.Scope;
-
             // Some dependencies of ILoggerFactory are registered after 
-            // FunctionsStartup, thus not allowing us to get the 
-            // ILoggerFactory from Autofac container. 
+            // FunctionsStartup, on a separate ServicesCollection, thus
+            // not allowing us to get the ILoggerFactory from Autofac container. 
             // So we are retrieving it from InstanceServices.
             var loggerFactory = functionInstance.InstanceServices.GetService<ILoggerFactory>() ?? scope.Resolve<ILoggerFactory>();
             scope.Resolve<ILoggerFactory>(
@@ -42,6 +42,26 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
             scope.Resolve<ILogger>(
                 new NamedParameter(LoggerModule.functionNameParam, functionName)
             );
+
+            // Add the functionInstanceEx itself to the scope
+            scope.Resolve<IFunctionInstanceEx>(
+                new NamedParameter(ConfigurationExtensions.functionInstanceParam, functionInstance)
+            );
+            if (ConfigurationExtensions.IEnvironmentType != null) // Required for TelemetryClient
+            {
+                var iEnvironment = functionInstance.InstanceServices.GetService(ConfigurationExtensions.IEnvironmentType);
+                scope.Resolve(ConfigurationExtensions.IEnvironmentType, new NamedParameter(ConfigurationExtensions.iEnvironmentParam, iEnvironment));
+            }
+            if (Activity.Current == null)
+            {
+                var activity = new Activity(functionName);
+                Activity.Current = activity.Start();
+
+                scope.CurrentScopeEnding += (sender, e) =>
+                {
+                    activity.Stop();
+                };
+            }
 
             return CreateInstance<T>(scope);
         }

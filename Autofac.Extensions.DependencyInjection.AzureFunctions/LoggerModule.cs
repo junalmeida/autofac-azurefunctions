@@ -7,6 +7,7 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
         public const string functionNameParam = "functionName";
         public const string loggerFactoryParam = "loggerFactory";
 
+
         protected override void Load(ContainerBuilder builder)
         {
             builder
@@ -17,6 +18,7 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
                     return factory;
                 })
                 .AsSelf()
+                .ExternallyOwned()
                 .SingleInstance();
 
             builder
@@ -29,6 +31,7 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
                 })
                 .AsSelf()
                 .InstancePerTriggerRequest();
+
 
         }
     }
