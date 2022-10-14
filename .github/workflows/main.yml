@@ -27,7 +27,7 @@ jobs:
 
       - uses: actions/setup-dotnet@v2
         with:
-           dotnet-version: '6.0.x' 
+           dotnet-version: '3.1.x' 
         
       - name: "Get Commit Date"
         uses: actions/github-script@0.3.0

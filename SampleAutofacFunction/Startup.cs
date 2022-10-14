@@ -15,8 +15,6 @@ namespace SampleAutofacFunction
         public override void Configure(IFunctionsHostBuilder builder)
         {
             builder
-                // You can call UseLogger to change how logging is done on your app by code. 
-                .UseLogger(ConfigureLogger)
                 // This is the required call in order to use autofac in your azure functions app
                 .UseAutofacServiceProviderFactory(ConfigureContainer);
         }
@@ -34,7 +32,7 @@ namespace SampleAutofacFunction
             builder.UseAppSettings(true);
         }
 
-        private void ConfigureContainer(ContainerBuilder builder)
+        private IContainer ConfigureContainer(ContainerBuilder builder)
         {
             builder
                 .Register(activator =>
@@ -71,6 +69,14 @@ namespace SampleAutofacFunction
                 .AsImplementedInterfaces()
                 .InstancePerTriggerRequest();
 
+            var appContainer = builder.Build();
+
+            // If you need a Multi-Tenant Container, use this code instead of plain appContainer;
+
+            // var multiTenant = new MultitenantContainer(tenantIdentificationStrategy, appContainer);
+            // return multiTenant
+
+            return appContainer;
         }
     }
 }

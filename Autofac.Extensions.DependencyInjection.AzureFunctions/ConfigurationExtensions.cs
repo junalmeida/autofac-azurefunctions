@@ -23,7 +23,23 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
         /// <param name="hostBuilder">An instance of <see cref="IFunctionsHostBuilder"/>.</param>
         /// <param name="configurationAction">Action on a <see cref="ContainerBuilder"/> that adds component registrations to the conatiner.</param>
         /// <returns>The IFunctionsHostBuilder.</returns>
-        public static IFunctionsHostBuilder UseAutofacServiceProviderFactory(this IFunctionsHostBuilder hostBuilder, Action<ContainerBuilder> configurationAction = null)
+        public static IFunctionsHostBuilder UseAutofacServiceProviderFactory(this IFunctionsHostBuilder hostBuilder, Action<ContainerBuilder> configurationAction = null) =>
+            UseAutofacServiceProviderFactory(hostBuilder, (builder) =>
+            {
+                configurationAction?.Invoke(builder);
+                var container = builder.Build();
+
+                return container;
+            });
+
+
+        /// <summary>
+        /// Attatch the <see cref="AutofacServiceProvider"/> to the <see cref="IFunctionsHostBuilder"/> of the current function host.
+        /// </summary>
+        /// <param name="hostBuilder">An instance of <see cref="IFunctionsHostBuilder"/>.</param>
+        /// <param name="configurationAction">Func on a <see cref="ContainerBuilder"/> that adds component registrations to the conatiner. You may return either a regular AutofacContainer or a MultiTenantContainer.</param>
+        /// <returns>The IFunctionsHostBuilder.</returns>
+        public static IFunctionsHostBuilder UseAutofacServiceProviderFactory(this IFunctionsHostBuilder hostBuilder, Func<ContainerBuilder, IContainer> configurationAction)
         {
             // Adding as a Singleton service will make sure post-registered
             // services like TelemetryClient will be in the scope.
@@ -33,9 +49,6 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
 
                 containerBuilder.Populate(hostBuilder.Services);
                 containerBuilder.RegisterModule<LoggerModule>();
-
-                // Call the user code to configure the container
-                configurationAction?.Invoke(containerBuilder);
 
                 IEnvironmentType = hostBuilder.Services.Where(s => s.ServiceType.Namespace == "Microsoft.Azure.WebJobs.Script").FirstOrDefault()?.ServiceType.Assembly.GetExportedTypes().Where(x => x.Name == "IEnvironment").FirstOrDefault();
                 if (IEnvironmentType != null)
@@ -58,7 +71,12 @@ namespace Autofac.Extensions.DependencyInjection.AzureFunctions
                 .ExternallyOwned()
                 .InstancePerTriggerRequest();
 
-                var container = containerBuilder.Build();
+                // Call the user code to configure the container
+                var container = configurationAction?.Invoke(containerBuilder);
+
+                if (container == null)
+                    throw new InvalidOperationException($"Container cannot be null. Call `builder.Build()` and return either the main container or a multi-tenant container.");
+
                 return new AutofacContainer(container);
             });
 
