@@ -32,7 +32,7 @@ namespace SampleAutofacFunction
             builder.UseAppSettings(true);
         }
 
-        private void ConfigureContainer(ContainerBuilder builder)
+        private IContainer ConfigureContainer(ContainerBuilder builder)
         {
             builder
                 .Register(activator =>
@@ -69,14 +69,14 @@ namespace SampleAutofacFunction
                 .AsImplementedInterfaces()
                 .InstancePerTriggerRequest();
 
-            //var appContainer = builder.Build();
+            var appContainer = builder.Build();
 
-            //// If you need a Multi-Tenant Container, use this code instead of plain appContainer;
+            // If you need a Multi-Tenant Container, use this code instead of plain appContainer;
 
-            //// var multiTenant = new MultitenantContainer(tenantIdentificationStrategy, appContainer);
-            //// return multiTenant
+            // var multiTenant = new MultitenantContainer(tenantIdentificationStrategy, appContainer);
+            // return multiTenant
 
-            //return appContainer;
+            return appContainer;
         }
     }
 }

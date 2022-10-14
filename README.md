@@ -47,7 +47,7 @@ public class Startup : FunctionsStartup
         builder.UseAppSettings();
     }
 
-    private void ConfigureContainer(ContainerBuilder builder)
+    private IContainer ConfigureContainer(ContainerBuilder builder)
     {
         builder
             .Register(activator =>
@@ -85,6 +85,17 @@ public class Startup : FunctionsStartup
             .InNamespace("MyNamespace.Services")
             .AsImplementedInterfaces()
             .InstancePerTriggerRequest();
+
+
+        
+        var appContainer = builder.Build();
+
+        // If you need a Multi-Tenant Container, use this code instead of plain appContainer;
+
+        // var multiTenant = new MultitenantContainer(tenantIdentificationStrategy, appContainer);
+        // return multiTenant
+
+        return appContainer;
 
     }
 }
